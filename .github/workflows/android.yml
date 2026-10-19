@@ -43,8 +43,7 @@ jobs:
           test -n "$KEYSTORE_B64" || { echo "::error::The ANDROID_KEYSTORE_B64 secret is missing"; exit 1; }
           export VERSION_NAME="1.0.$VERSION_CODE"
           echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
-          printf %s "$KEYSTORE_B64" | tr -d "
- " | base64 -d > "$RUNNER_TEMP/finad.p12"
+          printf '%s' "$KEYSTORE_B64" | tr -d '\r\n ' | base64 -d > "$RUNNER_TEMP/finad.p12"
           export KEYSTORE="$RUNNER_TEMP/finad.p12" KEY_ALIAS=finad KEY_PASSWORD="$KEYSTORE_PASSWORD"
           gradle -p android assembleRelease --no-daemon --stacktrace
           rm -f "$RUNNER_TEMP/finad.p12"
