@@ -183,6 +183,9 @@
             <label>News half-life <b id="v-halfLifeHours"></b> hours<input type="range" id="halfLifeHours" min="6" max="120" step="1"></label>
             <label>Weight of world drivers vs company news <b id="v-themeWeight"></b><input type="range" id="themeWeight" min="0" max="1" step="0.05"></label>
             <label>Alert only from conviction <b id="v-minConviction"></b>/100 (holdings always alert)<input type="range" id="minConviction" min="0" max="80" step="5"></label>
+            <label class="row"><input type="checkbox" id="alarmOn"> Loud alarm on this computer and the phone when it's time to buy</label>
+            <label>Sound the alarm for buys from conviction <b id="v-alarmConviction"></b>/100<input type="range" id="alarmConviction" min="30" max="95" step="5"></label>
+            <div class="row gap"><button id="alarmTest" class="btn">Test the alarm</button></div>
           </fieldset>
           <fieldset>
             <legend>Refresh and local AI</legend>

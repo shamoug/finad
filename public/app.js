@@ -562,6 +562,12 @@ async function renderSettings() {
   const mc = $('#minConviction'); mc.value = st.alerts.minConviction; $('#v-minConviction').textContent = st.alerts.minConviction;
   mc.oninput = () => $('#v-minConviction').textContent = mc.value;
   mc.onchange = async () => { S.settings = await api('settings', { body: { alerts: { minConviction: +mc.value } } }); };
+  const ac = $('#alarmConviction'); ac.value = st.alerts.alarmConviction; $('#v-alarmConviction').textContent = st.alerts.alarmConviction;
+  ac.oninput = () => $('#v-alarmConviction').textContent = ac.value;
+  ac.onchange = async () => { S.settings = await api('settings', { body: { alerts: { alarmConviction: +ac.value } } }); };
+  $('#alarmOn').checked = st.alerts.alarm;
+  $('#alarmOn').onchange = async (e) => { S.settings = await api('settings', { body: { alerts: { alarm: e.target.checked } } }); };
+  $('#alarmTest').onclick = async () => { await api('alarm/test', { body: {} }); toast({ title: 'Alarm sent', body: 'This computer rings now (in the desktop app). Your phone rings at its next check; open the app to check now.' }); };
   const rm = $('#refreshMinutes'); rm.value = st.refreshMinutes; $('#v-refreshMinutes').textContent = st.refreshMinutes;
   rm.oninput = () => $('#v-refreshMinutes').textContent = rm.value;
   rm.onchange = async () => { S.settings = await api('settings', { body: { refreshMinutes: +rm.value } }); };

@@ -10,6 +10,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 
 import org.json.JSONArray;
@@ -27,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 
 final class Feed {
     static final String STORE = "https://textdb.dev/api/data/";
-    static final String ALERTS = "alerts", APP = "app";
+    static final String ALERTS = "alerts", APP = "app", URGENT = "urgent";
 
     private Feed() {}
 
@@ -107,7 +111,7 @@ final class Feed {
             JSONObject a = list.optJSONObject(i);
             if (a == null || a.optLong("at") <= seen) continue;
             if (shown < 6) {
-                show(c, ALERTS, 100 + (a.optString("id").hashCode() & 0xffff), a.optString("title", "Finad"), a.optString("body", ""), open(c, a.optString("sym", "")));
+                show(c, a.optBoolean("urgent") ? URGENT : ALERTS, 100 + (a.optString("id").hashCode() & 0xffff), a.optString("title", "Finad"), a.optString("body", ""), open(c, a.optString("sym", "")));
                 shown++;
             } else more++;
         }
@@ -127,12 +131,32 @@ final class Feed {
         if (Build.VERSION.SDK_INT >= 26) {
             nm.createNotificationChannel(new NotificationChannel(ALERTS, "Sell and buy alerts", NotificationManager.IMPORTANCE_HIGH));
             nm.createNotificationChannel(new NotificationChannel(APP, "App updates", NotificationManager.IMPORTANCE_LOW));
+            // Time to buy: rings on the alarm volume (loud even when notifications are quiet) and vibrates.
+            NotificationChannel u = new NotificationChannel(URGENT, "Buy now alarm", NotificationManager.IMPORTANCE_HIGH);
+            u.setSound(alarmSound(), new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build());
+            u.enableVibration(true); u.setVibrationPattern(BUZZ);
+            nm.createNotificationChannel(u);
         }
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, channel) : new Notification.Builder(c);
         b.setSmallIcon(R.drawable.ic_notify).setContentTitle(title).setContentText(body)
             .setStyle(new Notification.BigTextStyle().bigText(body)).setAutoCancel(true).setContentIntent(tap)
             .setColor(0xFF2EC27E);
-        try { nm.notify(id, b.build()); } catch (SecurityException e) { /* notifications not allowed */ }
+        boolean urgent = URGENT.equals(channel);
+        if (urgent) {
+            b.setCategory(Notification.CATEGORY_ALARM).setPriority(Notification.PRIORITY_MAX).setColor(0xFFE01B24);
+            if (Build.VERSION.SDK_INT < 26) b.setSound(alarmSound(), AudioManager.STREAM_ALARM).setVibrate(BUZZ);
+        }
+        Notification n = b.build();
+        if (urgent) n.flags |= Notification.FLAG_INSISTENT;   // keeps ringing until it's opened or swiped away
+        try { nm.notify(id, n); } catch (SecurityException e) { /* notifications not allowed */ }
+    }
+
+    static final long[] BUZZ = { 0, 600, 300, 600, 300, 600 };
+
+    static Uri alarmSound() {
+        Uri u = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        return u != null ? u : RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
     }
 
     static String get(String url) throws Exception {

@@ -37,12 +37,12 @@ const settings = Object.assign({
   disabledSources: [],
   refreshMinutes: 15,
   ai: { enabled: true, model: '', perCycle: 40 },
-  alerts: { minConviction: 20, desktop: true },
+  alerts: { minConviction: 20, desktop: true, alarm: true, alarmConviction: 60 },
   phone: { enabled: false, key: null, ro: null, lastPush: 0, error: null },
 }, store.load('settings', {}));
 settings.cfg = { ...DEFAULTS, ...settings.cfg };
 settings.ai = { enabled: true, model: '', perCycle: 40, ...settings.ai };
-settings.alerts = { minConviction: 20, desktop: true, ...settings.alerts };
+settings.alerts = { minConviction: 20, desktop: true, alarm: true, alarmConviction: 60, ...settings.alerts };
 settings.phone = { enabled: false, key: null, ro: null, lastPush: 0, error: null, ...settings.phone };
 
 let articles = store.load('articles', []);
@@ -199,9 +199,11 @@ function detectAlerts() {
     const changed = !prev || prev.action !== r.action;
     const jumped = prev && prev.action === r.action && r.conviction - prev.conviction >= 25;
     if (!(changed || jumped) || (r.conviction < settings.alerts.minConviction && !r.held)) continue;
-    const verb = { SELL: 'Sell alert', BUY: 'Buy idea', AVOID: 'Warning', WATCH: 'Watch' }[r.action];
+    // A strong buy is urgent: both apps sound a loud alarm for it.
+    const urgent = r.action === 'BUY' && settings.alerts.alarm && r.conviction >= settings.alerts.alarmConviction;
+    const verb = urgent ? 'BUY NOW' : { SELL: 'Sell alert', BUY: 'Buy idea', AVOID: 'Warning', WATCH: 'Watch' }[r.action];
     fresh.push({
-      id: Date.now().toString(36) + '-' + r.sym, at: Date.now(), sym: r.sym, action: r.action, conviction: r.conviction, held: !!r.held,
+      id: Date.now().toString(36) + '-' + r.sym, at: Date.now(), sym: r.sym, action: r.action, conviction: r.conviction, held: !!r.held, urgent,
       title: `${verb}: ${r.sym}${r.held ? ' (you hold it)' : ''} · ${r.conviction}/100`,
       body: r.rationale.split(/(?<=\.)\s+/).slice(0, 2).join(' ').slice(0, 300),
       price: r.price, pos52: r.pos52, impact: r.impact,
@@ -378,6 +380,12 @@ async function api(req, res, url, body) {
     alerts.unshift(a); store.save('alerts', alerts); emit('alert', a);
     await syncPhone('test');
     return json(res, phoneInfo());
+  }
+  if (p === '/api/alarm/test' && req.method === 'POST') {
+    const a = { id: Date.now().toString(36) + '-test', at: Date.now(), sym: 'TEST', action: 'INFO', conviction: 0, held: false, urgent: true, title: 'BUY NOW: test alarm', body: 'This is how Finad sounds when a stock is a strong buy. Your phone rings like this at its next check.' };
+    alerts.unshift(a); store.save('alerts', alerts); emit('alert', a);
+    await syncPhone('alarm test');
+    return json(res, { ok: true });
   }
 
   // updates

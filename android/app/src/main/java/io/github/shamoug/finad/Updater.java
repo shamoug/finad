@@ -1,7 +1,7 @@
 // The app updates itself from the Finad website: downloads/android.json says the newest version, its file and its
 // SHA-256 (written by the workflow that builds it). A newer one is downloaded, checked and installed with Android's
-// package installer. The first time, Android asks to let Finad install apps; from Android 12 it then updates without
-// asking.
+// package installer. It looks at every background check (about every 15 minutes) and whenever the app opens. The first
+// time, Android asks to let Finad install apps; from Android 12 it then updates by itself without asking.
 package io.github.shamoug.finad;
 
 import android.app.PendingIntent;
@@ -21,7 +21,8 @@ import java.security.MessageDigest;
 
 public class Updater extends BroadcastReceiver {
     static final String INFO = "https://shamoug.github.io/finad/downloads/android.json";
-    static final long EVERY_MS = 6 * 3600 * 1000L;
+    static final long EVERY_MS = 10 * 60 * 1000L;          // the version file is tiny: look on every background check
+    static final long RETRY_MS = 6 * 3600 * 1000L;          // but download a version already handed to Android only every 6 hours
 
     static void checkIfDue(Context c) throws Exception { check(c, false); }
 
@@ -34,6 +35,7 @@ public class Updater extends BroadcastReceiver {
         int code = j.optInt("versionCode");
         if (code <= BuildConfig.VERSION_CODE) return null;
         String name = j.optString("versionName", String.valueOf(code));
+        if (!now && prefs.getInt("installing", 0) == code && System.currentTimeMillis() - prefs.getLong("installingAt", 0) < RETRY_MS) return null;
         if (Build.VERSION.SDK_INT >= 26 && !c.getPackageManager().canRequestPackageInstalls()) {
             Intent allow = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + c.getPackageName()))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -46,6 +48,7 @@ public class Updater extends BroadcastReceiver {
         byte[] apk = Feed.read(new java.net.URL(j.getString("url")).openStream());
         String sha = hex(MessageDigest.getInstance("SHA-256").digest(apk));
         if (!sha.equalsIgnoreCase(j.optString("sha256"))) throw new Exception("The download does not match its SHA-256");
+        prefs.edit().putInt("installing", code).putLong("installingAt", System.currentTimeMillis()).apply();
         install(c, apk, name);
         return name;
     }
@@ -81,7 +84,7 @@ public class Updater extends BroadcastReceiver {
             Feed.show(c, Feed.APP, 2, "Update Finad to " + name, "Downloaded and checked. Tap to install it.",
                 PendingIntent.getActivity(c, 3, confirm, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         } else if (status != PackageInstaller.STATUS_SUCCESS) {
-            Feed.prefs(c).edit().putLong("updateAt", 0).apply();
+            Feed.prefs(c).edit().putLong("updateAt", 0).putInt("installing", 0).apply();
         }
     }
 

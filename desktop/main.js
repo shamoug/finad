@@ -102,6 +102,36 @@ function next() {
   note.show();
 }
 
+// ---- the loud alarm for urgent buys: a WAV made here, played by Windows at full scale ----
+function alarmFile() {
+  const f = path.join(app.getPath('userData'), 'alarm.wav');
+  if (fs.existsSync(f)) return f;
+  const rate = 22050, beep = 0.18, gap = 0.07, n = Math.round(rate * (beep + gap) * 12);
+  const data = Buffer.alloc(n * 2);
+  for (let i = 0; i < n; i++) {
+    const t = i / rate, k = Math.floor(t / (beep + gap)), on = t - k * (beep + gap) < beep;
+    const hz = k % 2 ? 1320 : 880;
+    const v = on ? Math.max(-1, Math.min(1, 3 * Math.sin(2 * Math.PI * hz * t))) : 0;   // clipped sine: loud and harsh
+    data.writeInt16LE(Math.round(v * 32000), i * 2);
+  }
+  const h = Buffer.alloc(44);
+  h.write('RIFF', 0); h.writeUInt32LE(36 + data.length, 4); h.write('WAVE', 8); h.write('fmt ', 12);
+  h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(rate, 24);
+  h.writeUInt32LE(rate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write('data', 36); h.writeUInt32LE(data.length, 40);
+  fs.writeFileSync(f, Buffer.concat([h, data]));
+  return f;
+}
+let ringing = false;
+function alarm() {
+  if (ringing || process.platform !== 'win32') return;
+  ringing = true;
+  try {
+    const f = alarmFile().replace(/'/g, "''");
+    require('child_process').execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', `$p = New-Object Media.SoundPlayer '${f}'; $p.PlaySync(); $p.PlaySync()`],
+      { windowsHide: true }, () => { ringing = false; });
+  } catch { ringing = false; }
+}
+
 app.whenReady().then(async () => {
   firstRun();
   try {
@@ -110,7 +140,10 @@ app.whenReady().then(async () => {
     server = { ...info, mod };
     let lastCounts = '';
     mod.bus.on('event', (ev) => {
-      if (ev.type === 'alert' && mod.status) notify(ev.title, ev.body, ev.sym && ev.sym !== 'TEST' ? 'stock:' + ev.sym : 'signals');
+      if (ev.type === 'alert' && mod.status) {
+        if (ev.urgent) alarm();
+        notify(ev.title, ev.body, ev.sym && ev.sym !== 'TEST' ? 'stock:' + ev.sym : 'signals');
+      }
       if (ev.type === 'update') notify(`Finad ${ev.latest} is available`, 'Open Settings to install it. Your data and settings are kept.', 'settings');
       if (ev.type === 'done') {
         tray?.setToolTip(`Finad\n${ev.text}`);

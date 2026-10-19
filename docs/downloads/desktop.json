@@ -1,7 +1,7 @@
 {
-    "version":  "1.1.1",
+    "version":  "1.2.0",
     "url":  "https://shamoug.github.io/finad/downloads/Finad-app.zip",
-    "sha256":  "fb0153da5665ae44af5bf3ef996c7c100693b88ebf35b75aaa7c8e02b8f51a96",
-    "notes":  "One QR code on the Phone page installs and links the Android app.",
+    "sha256":  "a12d1c99c2319ef0ed1ea81f183667f2fe9c727a414ef0419480b292bc6556d5",
+    "notes":  "Loud alarm on the computer and the phone when it\u0027s time to buy; the phone app installs its updates by itself.",
     "date":  "2026-10-18"
 }
