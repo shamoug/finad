@@ -20,8 +20,8 @@ Website and downloads: **https://shamoug.github.io/finad/**
 
 Finad then starts with Windows, in the tray. From this project folder, `install.bat` installs the same way.
 
-**Android:** download `Finad-Android.apk` from the same page. In Finad on the computer, open **Phone**, turn on the phone link,
-and scan its QR code in the app.
+**Android:** in Finad on the computer, open **Phone** and turn on the phone link. Scan its one QR code with the phone's
+camera: it installs the app if needed (`Finad-Android.apk` from the same page) and links it. The app updates itself.
 
 **Developing:** `node server.js` runs Finad in the browser at http://localhost:4747 (Node 18+, no npm packages).
 

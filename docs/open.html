@@ -3,27 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Link Finad</title>
+<title>Get Finad</title>
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<!-- Opened by the QR code on Finad's Phone page (open.html#feed=<read-only id>) when the camera opens it in the
-     browser instead of the app: it hands the link to the app, or offers to install it first. -->
+<!-- The one QR code on Finad's Phone page: open.html#feed=<read-only id>. The installed app catches this link itself.
+     When the camera opens it in the browser instead, the page hands the link to the app, or, if the app is not
+     installed (Chrome falls back to open.html?install#feed=...), installs it first and then links it. -->
 <main class="wrap" style="max-width:560px;padding-top:50px">
   <div class="box center">
     <img src="assets/icon.png" alt="" width="72" height="72" style="border-radius:16px">
-    <h2 style="margin:12px 0 6px">Link this phone to Finad</h2>
+    <h2 style="margin:12px 0 6px" id="head">Link this phone to Finad</h2>
     <p id="msg">Opening the Finad app…</p>
+    <div id="install" hidden>
+      <ol style="text-align:left;font-size:15px;line-height:1.6;margin:14px 0">
+        <li>Tap <b>Install Finad</b> and open the downloaded file. Android asks once to allow installing apps from your browser.</li>
+        <li>When it is installed, come back to this page and tap <b>Open in the Finad app</b>. The phone is then linked.</li>
+      </ol>
+      <p><a class="btn green" href="downloads/Finad-Android.apk">Install Finad</a></p>
+    </div>
     <p><a class="btn primary" id="openApp" href="#">Open in the Finad app</a></p>
-    <p style="font-size:14px">Don't have the app yet? <a href="download.html">Download Finad for Android</a>, then scan the code again from inside the app.</p>
+    <p style="font-size:14px" id="already">Finad updates itself after this, so you only scan once.</p>
   </div>
 </main>
 <script>
 const id = (location.hash.match(/feed=([0-9A-Fa-f]{64})/) || [])[1];
-const a = document.getElementById('openApp');
-if (!id) { document.getElementById('msg').textContent = 'This link has no Finad code. Scan the QR code on the Phone page of Finad on your computer.'; a.style.display = 'none'; }
-else { a.href = 'finad://pair?feed=' + id; if (/Android/i.test(navigator.userAgent)) setTimeout(() => { location.href = a.href; }, 300); else document.getElementById('msg').textContent = 'Open this link on your Android phone, or scan the QR code with it.'; }
+const install = /[?&]install\b/.test(location.search);
+const $ = s => document.getElementById(s);
+const a = $('openApp');
+if (!id) { $('msg').textContent = 'This link has no Finad code. Scan the QR code on the Phone page of Finad on your computer.'; a.style.display = 'none'; }
+else if (!/Android/i.test(navigator.userAgent)) { a.href = 'finad://pair?feed=' + id; $('msg').textContent = 'Scan the QR code with your Android phone\'s camera.'; }
+else {
+  // Chrome opens the app when it is installed and otherwise loads the fallback, this page in install mode.
+  const back = new URL('open.html?install#feed=' + id, location.href).href;
+  a.href = 'intent://pair?feed=' + id + '#Intent;scheme=finad;package=io.github.shamoug.finad;S.browser_fallback_url=' + encodeURIComponent(back) + ';end';
+  if (install) { $('head').textContent = 'Get Finad for Android'; $('msg').textContent = 'Finad is not installed on this phone yet.'; $('install').hidden = false; }
+  else setTimeout(() => { location.href = a.href; }, 300);
+}
 </script>
 </body>
 </html>

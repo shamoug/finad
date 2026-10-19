@@ -226,8 +226,6 @@ td input { width: 90px; padding: 4px 6px; }
 form.inline { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 8px; align-items: center; }
 
 /* ---------- phone ---------- */
-.phonegrid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
-@media (max-width: 900px) { .phonegrid { grid-template-columns: 1fr; } }
 .qr { background: #fff; border-radius: 12px; padding: 10px; width: 220px; height: 220px; display: grid; place-items: center; margin: 10px 0; }
 .qr img, .qr svg { width: 200px; height: 200px; image-rendering: pixelated; }
 .pair { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; }

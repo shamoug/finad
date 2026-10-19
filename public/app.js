@@ -504,18 +504,17 @@ function qr(text, el) {
   catch { el.textContent = 'QR code unavailable'; }
 }
 async function renderPhone() {
-  qr('https://shamoug.github.io/finad/download.html', $('#qrApp'));
   const p = S.phone = await api('phone');
   const body = $('#phoneBody');
   if (!p.enabled || !p.paired) {
-    body.innerHTML = `<p>Turn on the phone link. Finad then sends its signals and alerts to your phone after every update.</p>
+    body.innerHTML = `<p>Turn on the phone link to get one QR code. Scanned with your Android phone's camera, it installs the Finad app if needed and links it to this computer. Finad then sends its signals and alerts to your phone after every update, and the app updates itself.</p>
       ${p.error ? `<p class="down small">The last attempt failed: ${esc(p.error)}</p>` : ''}
       <button id="phoneOn" class="btn primary">Turn on the phone link</button>`;
     $('#phoneOn').onclick = async (e) => { e.target.disabled = true; e.target.textContent = 'Linking…'; await api('phone/enable', { body: {} }).catch(err => toast({ title: 'Phone link failed', body: err.message })); renderPhone(); };
     return;
   }
   body.innerHTML = `<div class="pair"><div class="qr" id="qrPair"></div><div>
-      <p><b>Scan this in the Finad app</b> (Link computer → Scan QR code), or with the phone's camera once the app is installed.</p>
+      <p><b>Scan this with your Android phone's camera.</b> It installs the Finad app if the phone does not have it yet, then links it to this computer. Already have the app? Scan it there with Link computer → Scan QR code. The app updates itself, so you only scan once.</p>
       <div class="kv"><span>Status</span><b class="${p.error ? 'down' : 'up'}">${p.error ? 'Last send failed: ' + esc(p.error) : 'Linked'}</b>
         <span>Last sent</span><b>${p.lastPush ? ago(p.lastPush) : 'never'}</b>
         <span>Store</span><b>${esc(p.store)}</b>
