@@ -1,0 +1,52 @@
+// Finad for Android. Built and signed by GitHub Actions (.github/workflows/android.yml): the signing key comes from
+// the repository's secrets, so every build installs over the last one.
+plugins {
+    id 'com.android.application'
+}
+
+def env = System.getenv()
+
+android {
+    namespace 'io.github.shamoug.finad'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'io.github.shamoug.finad'
+        minSdk 24
+        targetSdk 34
+        versionCode Integer.parseInt(env.VERSION_CODE ?: '1')
+        versionName env.VERSION_NAME ?: '1.0.0'
+    }
+
+    signingConfigs {
+        release {
+            if (env.KEYSTORE) {
+                storeFile file(env.KEYSTORE)
+                storePassword env.KEYSTORE_PASSWORD
+                keyAlias env.KEY_ALIAS
+                keyPassword env.KEY_PASSWORD
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (env.KEYSTORE) signingConfig signingConfigs.release
+        }
+    }
+
+    buildFeatures { buildConfig true }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Google's code scanner, for "Scan QR code": Play services shows the camera, so the app asks for no camera permission.
+    implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
+    // Background check for new alerts and app updates, about every 15 minutes.
+    implementation 'androidx.work:work-runtime:2.9.1'
+}

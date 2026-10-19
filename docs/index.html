@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finad: news turned into stock signals</title>
+<meta name="description" content="Finad reads market and world news on your computer and flags stocks near their 52-week high that the news turns against, and stocks near their 52-week low that it turns in favour of. Free for Windows, with an Android app for alerts.">
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="logo" href="./"><img src="assets/icon.png" alt="">Finad</a>
+  <nav><a href="#how">How it works</a><a href="#features">Features</a><a href="#phone">Phone</a><a href="#privacy">Privacy</a><a class="btn primary" href="download.html">Download</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Windows · Android alerts · local AI optional</div>
+      <h1>Sell what the news is about to hurt. Buy what it's about to lift.</h1>
+      <p>Finad reads stock-market and world news all day on your computer. It works out which stocks each story moves and flags two things: stocks near their <b>52-week high</b> that the news is turning against, and stocks near their <b>52-week low</b> that it's turning in favour of. Alerts reach your phone.</p>
+      <div class="ctas"><a class="btn primary" href="download.html">Download Finad · free</a><a class="btn" href="#how">See how it works</a></div>
+    </div>
+    <div class="demo" aria-label="Example of Finad's signals">
+      <div class="dcard"><div class="r1"><b>HLT</b><span class="badge">SELL</span><span style="color:var(--muted)">Hilton</span><span class="px">344.10</span></div>
+        <p>Near its 52-week high while war and Middle-East shipping risk hit travel demand, and rising oil adds to costs. A slide back to the 52-week midpoint would be −14%.</p>
+        <div class="range"><i style="left:88%"></i></div></div>
+      <div class="dcard buy"><div class="r1"><b>LHX</b><span class="badge buy">BUY</span><span style="color:var(--muted)">L3Harris</span><span class="px">248.51</span></div>
+        <p>Beaten down to 7% above its 52-week low while escalating conflict lifts defense demand. A recovery to the 52-week midpoint would be +23%.</p>
+        <div class="range"><i style="left:11%"></i></div></div>
+      <div class="live"><span><span class="dot"></span>Brent crude near $109 as tankers attacked in Middle East → <b style="color:var(--buy)">XOM ▲</b> <b style="color:var(--sell)">DAL ▼</b></span><span><span class="dot"></span>Fed signals rate cuts as inflation cools → <b style="color:var(--buy)">DHI ▲ LEN ▲</b></span></div>
+    </div>
+  </div>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <p class="sub">Every 15 minutes Finad reads about 20 news sources, including CNBC, MarketWatch, WSJ, FT, NYT, BBC, Al Jazeera, the Federal Reserve and Google News, plus company news for every stock you hold or follow.</p>
+    <ol class="steps">
+      <li><b>Read</b><span>Each story is processed as it arrives. Watch it happen in the Live newsroom.</span></li>
+      <li><b>Connect</b><span>Finad finds the companies a story names and its tone (beats, raised guidance, upgrades, or misses, probes, recalls). It also detects 30 world drivers, such as oil, rates, tariffs, war and AI spending, and the stocks each one helps or hurts.</span></li>
+      <li><b>Score</b><span>It weighs every story by source and recency into a news impact for 190+ stocks, then crosses that with where each stock sits in its 52-week range.</span></li>
+      <li><b>Alert</b><span>A stock that newly turns SELL or BUY raises an alert on your desktop and on your phone, with the reasons and the headlines behind it.</span></li>
+    </ol>
+    <div class="quad" style="margin-top:22px">
+      <div class="q-sell"><b>SELL</b><span>Near the 52-week high, and the news turns against it. Little upside is left, and the risk is skewed down.</span></div>
+      <div class="q-buy"><b>BUY</b><span>Near the 52-week low, and the news turns in its favour. It's beaten down, and a catalyst is building.</span></div>
+      <div class="q-avoid"><b>AVOID</b><span>Near the low, and the news is still negative: a falling knife.</span></div>
+      <div class="q-hold"><b>HOLD</b><span>Near the high, and the news still supports it: momentum intact.</span></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>What it does</h2>
+    <p class="sub">A desktop app that starts with Windows and keeps working from the system tray.</p>
+    <div class="grid3">
+      <div class="box"><div class="ic">📈</div><h3>Signals with reasons</h3><p>Sell alerts and buy ideas, each with a conviction score, the 52-week range, the world drivers involved and the stories behind it.</p></div>
+      <div class="box"><div class="ic">📡</div><h3>Live newsroom</h3><p>Watch each story come in, see which stocks and themes it touches, and follow the local AI's reading.</p></div>
+      <div class="box"><div class="ic">🌍</div><h3>World drivers</h3><p>Oil, rates, inflation, tariffs, war and ceasefires, AI capex, China, disasters, outbreaks and more, each mapped to the businesses it helps or hurts.</p></div>
+      <div class="box"><div class="ic">🗺️</div><h3>Market map</h3><p>Every stock plotted by its place in the 52-week range against its news impact, with the buy and sell zones shaded.</p></div>
+      <div class="box"><div class="ic">💼</div><h3>Your portfolio first</h3><p>Add what you hold and the stocks you're interested in. Your positions come first, and you're warned when one turns against you.</p></div>
+      <div class="box"><div class="ic">🤖</div><h3>Local AI, optional</h3><p>With Ollama installed, a local model also reads the headlines. Nothing leaves your computer, and Finad works without it.</p></div>
+    </div>
+  </section>
+
+  <section id="phone">
+    <h2>Alerts on your Android phone</h2>
+    <p class="sub">The Finad app for Android shows your signals, alerts, world drivers and the latest market-moving news, and notifies you of every new sell or buy alert. Link it once by scanning the QR code on Finad's Phone page. The app updates itself.</p>
+    <div class="grid2">
+      <div class="box"><h3>How the link works</h3><p>After each update, Finad on your computer writes a compact feed to <b>textdb.dev</b>, a free public JSON store, under a secret key. Your phone gets a <b>read-only</b> link to that feed, so it can read but never change it, and checks it about every 15 minutes.</p></div>
+      <div class="box"><h3>What is sent</h3><p>Signals, alerts, world drivers, headlines, and which of your stocks are flagged. Your share counts and costs are never sent. Anyone with the read-only link can read the feed, so keep the QR code to yourself, and make a new link at any time.</p></div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <h2>Rules it follows</h2>
+    <div class="grid2">
+      <div class="box"><h3>Runs on your computer</h3><p>News, prices, analysis and AI all run locally. Data lives in one folder (<code>%USERPROFILE%\.finad</code>).</p></div>
+      <div class="box"><h3>Public sources only</h3><p>Public RSS feeds and Yahoo Finance prices. No account, no API keys, no tracking.</p></div>
+      <div class="box"><h3>Updates you can check</h3><p>The desktop and Android apps update from this website, and a download that doesn't match its published SHA-256 checksum is never installed.</p></div>
+      <div class="box"><h3>Not financial advice</h3><p>Finad's signals are automated readings of public headlines. It's a research tool, not a licensed adviser. Check the sources before you trade.</p></div>
+    </div>
+  </section>
+
+  <section class="center">
+    <h2>Get Finad</h2>
+    <p class="sub" style="margin:8px auto 22px">Free. Windows 10 or 11 (64-bit). Android 7 or later for the phone app.</p>
+    <a class="btn primary" href="download.html">Go to download</a>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <span>Finad · by Aladdin Shamoug</span>
+  <span><a href="download.html">Download</a> · <a href="https://github.com/shamoug/finad">GitHub</a></span>
+  <p class="disc">Finad produces automated, algorithmic signals from public news. It is not a licensed financial adviser, and its signals are not personalised investment advice. Markets can move against any signal.</p>
+</div></footer>
+</body>
+</html>

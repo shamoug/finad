@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finad</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side" id="side">
+    <div class="brand"><img src="icon.svg" alt="" width="30" height="30"><div><b>Finad</b><small>news → stock signals</small></div></div>
+    <nav id="nav">
+      <button data-view="signals" class="on"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Signals<span class="cnt" id="nav-signals"></span></button>
+      <button data-view="live"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 010 8.4M7.8 16.2a6 6 0 010-8.4M19 5a10 10 0 010 14M5 19A10 10 0 015 5"/></svg>Live newsroom<span class="dot" id="liveDot"></span></button>
+      <button data-view="alerts"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>Alerts<span class="cnt" id="nav-alerts"></span></button>
+      <button data-view="map"><svg viewBox="0 0 24 24"><circle cx="7" cy="15" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="17" cy="17" r="2"/><path d="M3 3v18h18"/></svg>Market map</button>
+      <button data-view="themes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>World drivers</button>
+      <button data-view="news"><svg viewBox="0 0 24 24"><path d="M4 5h13v14H6a2 2 0 01-2-2zM17 9h3v8a2 2 0 01-2 2M8 9h5M8 13h5"/></svg>News</button>
+      <button data-view="portfolio"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Portfolio</button>
+      <button data-view="phone"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Phone</button>
+      <button data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 007 19.4l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 003 14H3a2 2 0 110-4h.1A1.7 1.7 0 004.6 7l-.1-.1a2 2 0 112.8-2.8l.1.1A1.7 1.7 0 0010 3V3a2 2 0 114 0v.1a1.7 1.7 0 002.9 1.2l.1-.1a2 2 0 112.8 2.8l-.1.1A1.7 1.7 0 0021 10h.1a2 2 0 110 4z"/></svg>Settings</button>
+    </nav>
+    <div class="sidefoot">
+      <div id="statusCard" class="statuscard">
+        <div class="srow"><span id="phaseDot" class="pdot"></span><b id="phaseText">Starting…</b></div>
+        <div id="phaseSub" class="muted small"></div>
+        <div class="bar2"><i id="phaseBar"></i></div>
+      </div>
+      <button id="refresh" class="btn wide">↻ Read the news now</button>
+      <div class="row gap small muted"><span id="verText"></span><button id="themeToggle" class="btn icon small" title="Light / dark">◐</button></div>
+    </div>
+  </aside>
+
+  <div class="mainwrap">
+    <header class="top">
+      <button id="menuBtn" class="btn icon menu" aria-label="Menu">☰</button>
+      <h1 id="pageTitle">Signals</h1>
+      <div id="tape" class="tape"></div>
+    </header>
+    <div id="updateBanner" class="banner" hidden></div>
+
+    <main>
+      <!-- SIGNALS -->
+      <section id="view-signals" class="view on">
+        <div id="kpis" class="kpis"></div>
+        <div class="dash">
+          <div class="dashmain">
+            <div class="cols">
+              <div class="col">
+                <div class="colhead sell"><h2>Sell alerts</h2><p>Near the 52-week high, and the news is turning against the stock</p></div>
+                <div id="sellList" class="cards"></div>
+              </div>
+              <div class="col">
+                <div class="colhead buy"><h2>Buy ideas</h2><p>Near the 52-week low, and the news is turning in the stock's favour</p></div>
+                <div id="buyList" class="cards"></div>
+              </div>
+            </div>
+            <div class="cols minor">
+              <div class="col">
+                <div class="colhead avoid"><h3>Avoid: falling knives</h3><p>Near the low, and the news is still negative</p></div>
+                <div id="avoidList" class="mini"></div>
+              </div>
+              <div class="col">
+                <div class="colhead hold"><h3>Hold: momentum</h3><p>Near the high, and the news still supports it</p></div>
+                <div id="holdList" class="mini"></div>
+              </div>
+            </div>
+          </div>
+          <aside class="dashside">
+            <div class="panel">
+              <div class="panelhead"><h3><span class="livepulse"></span>Live newsroom</h3><a href="#" data-go="live">Open →</a></div>
+              <div id="miniLive" class="stream compact"></div>
+            </div>
+            <div class="panel">
+              <div class="panelhead"><h3>Latest alerts</h3><a href="#" data-go="alerts">All →</a></div>
+              <div id="miniAlerts" class="alertlist compact"></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- LIVE -->
+      <section id="view-live" class="view">
+        <p class="lead">Every story Finad reads shows up here as it is processed. It checks each one for the companies it names and the tone of each mention, detects world drivers, has the local AI read it, then scores stocks, raises alerts and updates your phone.</p>
+        <div id="pipeline" class="pipeline"></div>
+        <div class="livegrid">
+          <div class="panel">
+            <div class="panelhead"><h3><span class="livepulse"></span>Stories as they arrive</h3>
+              <label class="row gap small"><input type="checkbox" id="liveOnlyRelevant" checked> Market-moving only</label></div>
+            <div id="liveStream" class="stream"></div>
+          </div>
+          <div class="panel">
+            <div class="panelhead"><h3>Activity</h3></div>
+            <div id="liveLog" class="log"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALERTS -->
+      <section id="view-alerts" class="view">
+        <p class="lead">An alert is raised when a stock newly turns <b class="down">SELL</b> or <b class="up">BUY</b>, when its conviction jumps, or when a stock you hold turns against you. Alerts appear as Windows notifications and on your phone.</p>
+        <div id="alertList" class="alertlist"></div>
+      </section>
+
+      <!-- MAP -->
+      <section id="view-map" class="view">
+        <div class="bar">
+          <p class="muted">Each dot is a stock. Left to right: where it trades in its 52-week range. Bottom to top: how today's news affects it. Bigger dots have more stories.</p>
+          <select id="sectorFilter"><option value="">All sectors</option></select>
+        </div>
+        <div class="mapwrap"><svg id="scatter" viewBox="0 0 1000 560" role="img" aria-label="Stocks by 52-week position and news impact"></svg><div id="tip" class="tip"></div></div>
+        <div class="bar"><h3>All stocks</h3><input id="tableSearch" placeholder="Filter by symbol, name or sector…"></div>
+        <div class="tablewrap"><table id="allTable"></table></div>
+      </section>
+
+      <!-- THEMES -->
+      <section id="view-themes" class="view">
+        <p class="lead">The world and macro themes active in the last few days, and which stocks each one helps or hurts.</p>
+        <div id="themeGrid" class="grid"></div>
+      </section>
+
+      <!-- NEWS -->
+      <section id="view-news" class="view">
+        <div class="bar">
+          <div class="seg" id="newsFilter">
+            <button data-f="relevant" class="on">Market-moving</button><button data-f="market">Markets</button><button data-f="world">World</button><button data-f="all">All</button>
+          </div>
+          <input id="newsSearch" placeholder="Search headlines or a ticker…">
+        </div>
+        <div id="newsList" class="news"></div>
+      </section>
+
+      <!-- PORTFOLIO -->
+      <section id="view-portfolio" class="view">
+        <p class="lead">Add what you hold and the stocks you're interested in. Finad reads company news for each of them, puts your holdings first in the signal lists, and alerts you when one turns against you.</p>
+        <div id="pfSummary" class="kpis"></div>
+        <div class="panel">
+          <div class="panelhead"><h3>Holdings</h3></div>
+          <div class="tablewrap flat"><table id="pfTable"></table></div>
+          <form id="pfAdd" class="inline">
+            <input name="sym" placeholder="Ticker (e.g. AAPL)" required>
+            <input name="shares" type="number" step="any" placeholder="Shares">
+            <input name="cost" type="number" step="any" placeholder="Avg cost">
+            <button class="btn primary">Add holding</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panelhead"><h3>Stocks I'm interested in</h3></div>
+          <p class="muted">Any Yahoo Finance symbol. Tags link it to world drivers; for example, <code>airline</code> means it's hurt when oil rises. The 190 large US stocks Finad already follows don't need adding.</p>
+          <form id="customAdd" class="inline">
+            <input name="sym" placeholder="Ticker" required>
+            <input name="tags" placeholder="Tags, space-separated (optional)" list="tagList">
+            <button class="btn">Track</button>
+            <span id="customMsg" class="muted"></span>
+          </form>
+          <datalist id="tagList"></datalist>
+          <div id="customList" class="chips"></div>
+        </div>
+      </section>
+
+      <!-- PHONE -->
+      <section id="view-phone" class="view">
+        <div class="phonegrid">
+          <div class="panel">
+            <div class="panelhead"><h3>1 · Get the Android app</h3></div>
+            <p class="muted">Scan with your phone's camera to download Finad for Android from the Finad website. It updates itself.</p>
+            <div class="qr" id="qrApp"></div>
+            <p class="small"><a href="https://shamoug.github.io/finad/download.html" target="_blank" rel="noopener">shamoug.github.io/finad/download.html</a></p>
+          </div>
+          <div class="panel">
+            <div class="panelhead"><h3>2 · Link your phone</h3></div>
+            <div id="phoneBody"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panelhead"><h3>How the phone link works</h3></div>
+          <p class="muted">After each update, Finad writes a compact feed to <b>textdb.dev</b>, a free public JSON store with no account: the signals, your holdings' signals, alerts, world drivers and the latest market-moving headlines. It writes under a secret key that only this computer knows. The phone gets a <b>read-only</b> link to that feed, so it can read but never change it. The app checks the feed in the background about every 15 minutes and notifies you of new alerts. Anyone who has the read-only link can read the feed, so keep the QR code to yourself. Your share counts and costs are never sent.</p>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="view-settings" class="view">
+        <div class="settings">
+          <fieldset>
+            <legend>Signal rules</legend>
+            <label>Near 52-week high starts at <b id="v-highZone"></b> of the range<input type="range" id="highZone" min="0.6" max="0.97" step="0.01"></label>
+            <label>Near 52-week low ends at <b id="v-lowZone"></b> of the range<input type="range" id="lowZone" min="0.03" max="0.4" step="0.01"></label>
+            <label>Minimum news impact for a signal <b id="v-minImpact"></b><input type="range" id="minImpact" min="0.02" max="0.6" step="0.01"></label>
+            <label>News half-life <b id="v-halfLifeHours"></b> hours<input type="range" id="halfLifeHours" min="6" max="120" step="1"></label>
+            <label>Weight of world drivers vs company news <b id="v-themeWeight"></b><input type="range" id="themeWeight" min="0" max="1" step="0.05"></label>
+            <label>Alert only from conviction <b id="v-minConviction"></b>/100 (holdings always alert)<input type="range" id="minConviction" min="0" max="80" step="5"></label>
+          </fieldset>
+          <fieldset>
+            <legend>Refresh and local AI</legend>
+            <label>Read news and prices every <b id="v-refreshMinutes"></b> minutes<input type="range" id="refreshMinutes" min="5" max="120" step="5"></label>
+            <label class="row"><input type="checkbox" id="aiEnabled"> Use local AI (Ollama) to read headlines</label>
+            <label>Model <select id="aiModel"><option value="">Auto</option></select></label>
+            <p id="aiInfo" class="muted"></p>
+            <div class="row gap"><button id="reanalyze" class="btn">Re-run analysis</button><button id="aiReset" class="btn">Clear AI readings</button></div>
+          </fieldset>
+          <fieldset>
+            <legend>Updates</legend>
+            <div id="updateBox"></div>
+          </fieldset>
+          <fieldset>
+            <legend>About</legend>
+            <p id="about" class="muted"></p>
+            <p class="muted">Finad runs on this computer. It reads public RSS feeds and Yahoo Finance prices; with Ollama installed, a local model also reads the headlines. Your holdings stay here. Only the phone feed described under Phone leaves the computer, and only when you link a phone.</p>
+          </fieldset>
+          <fieldset class="wide">
+            <legend>News sources</legend>
+            <div id="sourceList" class="sources"></div>
+          </fieldset>
+        </div>
+      </section>
+    </main>
+
+    <footer class="disclaimer">
+      Finad produces automated, algorithmic signals from public news. It is not a licensed financial adviser, and its signals are not personalised investment advice. Markets can move against any signal. Check the sources and do your own research before you trade.
+    </footer>
+  </div>
+</div>
+
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <button class="close" id="drawerClose" aria-label="Close">×</button>
+  <div id="drawerBody"></div>
+</aside>
+<div id="scrim" class="scrim"></div>
+<div id="toasts" class="toasts"></div>
+<script src="vendor/qrcode.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link Finad</title>
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<!-- Opened by the QR code on Finad's Phone page (open.html#feed=<read-only id>) when the camera opens it in the
+     browser instead of the app: it hands the link to the app, or offers to install it first. -->
+<main class="wrap" style="max-width:560px;padding-top:50px">
+  <div class="box center">
+    <img src="assets/icon.png" alt="" width="72" height="72" style="border-radius:16px">
+    <h2 style="margin:12px 0 6px">Link this phone to Finad</h2>
+    <p id="msg">Opening the Finad app…</p>
+    <p><a class="btn primary" id="openApp" href="#">Open in the Finad app</a></p>
+    <p style="font-size:14px">Don't have the app yet? <a href="download.html">Download Finad for Android</a>, then scan the code again from inside the app.</p>
+  </div>
+</main>
+<script>
+const id = (location.hash.match(/feed=([0-9A-Fa-f]{64})/) || [])[1];
+const a = document.getElementById('openApp');
+if (!id) { document.getElementById('msg').textContent = 'This link has no Finad code. Scan the QR code on the Phone page of Finad on your computer.'; a.style.display = 'none'; }
+else { a.href = 'finad://pair?feed=' + id; if (/Android/i.test(navigator.userAgent)) setTimeout(() => { location.href = a.href; }, 300); else document.getElementById('msg').textContent = 'Open this link on your Android phone, or scan the QR code with it.'; }
+</script>
+</body>
+</html>

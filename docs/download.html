@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download Finad</title>
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="logo" href="./"><img src="assets/icon.png" alt="">Finad</a>
+  <nav><a href="./#how">How it works</a><a href="./#phone">Phone</a><a href="./#privacy">Privacy</a><a class="on" href="download.html">Download</a></nav>
+</div></header>
+
+<main class="wrap">
+  <section style="border-top:0">
+    <h2>Download Finad</h2>
+    <p class="sub">Free. The desktop app does the work and the phone app brings the alerts with you. Both update themselves from this website.</p>
+    <div class="dl">
+      <div class="box">
+        <h3>🖥️ Windows (10 or 11, 64-bit)</h3>
+        <p>The desktop app reads the news, scores the stocks and raises the alerts. It starts with Windows and keeps working from the system tray.</p>
+        <a class="btn primary" href="downloads/Finad-Installer.zip" id="winBtn">Download Finad for Windows</a>
+        <div class="meta" id="winMeta">Finad-Installer.zip</div>
+        <ol>
+          <li>Unzip the download.</li>
+          <li>Double-click <code>install.bat</code>. No admin rights are needed; it downloads the app runtime (about 110 MB) once.</li>
+          <li>Finad opens, adds Start Menu and Desktop shortcuts, and starts with Windows from then on.</li>
+        </ol>
+        <p style="font-size:13.5px">Optional: install <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> and run <code>ollama pull qwen3:4b-instruct</code> so a local AI also reads the headlines.</p>
+      </div>
+      <div class="box">
+        <h3>📱 Android (7 or later)</h3>
+        <p>Your signals, alerts, world drivers and news, with a notification for every new sell or buy alert.</p>
+        <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+          <div class="qr" id="qr"></div>
+          <div style="flex:1;min-width:200px">
+            <a class="btn green" href="downloads/Finad-Android.apk" id="apkBtn">Download Finad for Android</a>
+            <div class="meta" id="apkMeta" style="margin-top:8px">Finad-Android.apk</div>
+          </div>
+        </div>
+        <ol>
+          <li>Scan the code with your phone's camera, or open this page on the phone, and download the app.</li>
+          <li>Open the file. Android asks once to allow installing apps from your browser.</li>
+          <li>In Finad on your computer, open <b>Phone</b> and turn on the phone link. Then tap <b>Scan QR code</b> in the app.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Checksums</h2>
+    <p class="sub">The apps check these before installing an update. To check a download yourself in PowerShell: <code>Get-FileHash Finad-Installer.zip</code>.</p>
+    <div class="box"><div class="meta" id="sums">Loading…</div></div>
+  </section>
+
+  <section>
+    <h2>Uninstall</h2>
+    <p class="sub">Windows: Settings → Apps → Finad → Uninstall. Your data stays in <code>%USERPROFILE%\.finad</code> until you delete that folder. Android: uninstall like any other app.</p>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <span>Finad · by Aladdin Shamoug</span>
+  <span><a href="./">Home</a> · <a href="https://github.com/shamoug/finad">GitHub</a></span>
+  <p class="disc">Finad produces automated, algorithmic signals from public news. It is not a licensed financial adviser, and its signals are not personalised investment advice.</p>
+</div></footer>
+<script src="assets/qrcode.js"></script>
+<script>
+const apk = new URL('downloads/Finad-Android.apk', location.href).href;
+try { const q = qrcode(0, 'M'); q.addData(apk); q.make(); document.getElementById('qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 1, scalable: true }); } catch (e) {}
+const kb = n => n ? (n / 1048576).toFixed(1) + ' MB' : '';
+const sums = [];
+async function info(file, meta, label) {
+  try {
+    const j = await (await fetch(file + '?t=' + Date.now(), { cache: 'no-store' })).json();
+    document.getElementById(meta).textContent = `${label} ${j.versionName || j.version}${j.date ? ' · ' + j.date : ''}`;
+    sums.push(`${label} ${j.versionName || j.version}: ${j.sha256}`);
+    document.getElementById('sums').innerHTML = sums.join('<br>');
+  } catch { document.getElementById(meta).textContent = label + ': version information not published yet'; }
+}
+info('downloads/desktop.json', 'winMeta', 'Windows app');
+info('downloads/android.json', 'apkMeta', 'Android app');
+</script>
+</body>
+</html>

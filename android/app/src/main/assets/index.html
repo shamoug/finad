@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Finad</title>
+<style>
+:root { --bg:#0a101d; --panel:#111a2b; --panel2:#172338; --line:#22314c; --text:#e7edf6; --muted:#8b9ab3; --sell:#f0645a; --sell-bg:rgba(240,100,90,.13); --buy:#2ec27e; --buy-bg:rgba(46,194,126,.13); --avoid:#d9a23b; --hold:#5b9cf0; --accent:#5b9cf0; --mono: ui-monospace, "Roboto Mono", monospace; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 Roboto, system-ui, sans-serif; }
+a { color: var(--accent); text-decoration: none; }
+.top { position: sticky; top: 0; z-index: 5; background: rgba(10,16,29,.92); backdrop-filter: blur(8px); padding: 12px 16px 10px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+.top h1 { font-size: 20px; margin: 0; flex: 1; }
+.top small { color: var(--muted); font-size: 12px; display: block; font-weight: 400; }
+.iconbtn { background: var(--panel2); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 7px 11px; font: inherit; font-size: 14px; }
+main { padding: 12px 14px 90px; }
+.view { display: none; } .view.on { display: block; }
+.tabs { position: fixed; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--panel); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); z-index: 6; }
+.tabs button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 11.5px; padding: 8px 0 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; }
+.tabs button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabs button.on { color: var(--text); }
+.tabs button.on svg { stroke: var(--accent); }
+.tabs .cnt { position: absolute; top: 4px; left: 56%; background: var(--sell); color: #fff; font-size: 10px; font-weight: 700; border-radius: 99px; padding: 0 5px; }
+.tabs .cnt:empty { display: none; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+.kpi span { font-size: 11px; color: var(--muted); display: block; }
+.kpi b { font-size: 22px; }
+.seg { display: flex; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 3px; margin-bottom: 12px; }
+.seg button { flex: 1; background: none; border: 0; color: var(--muted); font: inherit; font-size: 13.5px; padding: 7px 4px; border-radius: 9px; }
+.seg button.on { background: var(--panel2); color: var(--text); font-weight: 600; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 13px; margin-bottom: 9px; }
+.card.SELL { box-shadow: inset 3px 0 0 var(--sell); } .card.BUY { box-shadow: inset 3px 0 0 var(--buy); }
+.r1 { display: flex; align-items: center; gap: 8px; }
+.sym { font-family: var(--mono); font-weight: 700; font-size: 16px; }
+.name { color: var(--muted); font-size: 12.5px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.px { font-family: var(--mono); font-weight: 600; text-align: right; font-size: 14px; }
+.px small { display: block; font-size: 11.5px; }
+.badge { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 99px; }
+.badge.SELL { background: var(--sell-bg); color: var(--sell); } .badge.BUY { background: var(--buy-bg); color: var(--buy); }
+.badge.AVOID { background: rgba(217,162,59,.15); color: var(--avoid); } .badge.HOLD { background: rgba(91,156,240,.15); color: var(--hold); }
+.badge.held { background: var(--accent); color: #fff; } .badge.NONE, .badge.WATCH, .badge.INFO { background: var(--panel2); color: var(--muted); }
+.why { font-size: 13px; margin-top: 7px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; opacity: .92; }
+.r3 { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.range { position: relative; height: 6px; background: linear-gradient(90deg, var(--buy-bg), var(--panel2) 50%, var(--sell-bg)); border-radius: 3px; flex: 1; }
+.range i { position: absolute; top: -4px; width: 4px; height: 14px; border-radius: 2px; background: var(--text); transform: translateX(-2px); }
+.up { color: var(--buy); } .down { color: var(--sell); } .muted { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.chip { font-size: 11.5px; padding: 2px 8px; border-radius: 99px; background: var(--panel2); border: 1px solid var(--line); }
+.chip.pos { color: var(--buy); } .chip.neg { color: var(--sell); }
+.empty { text-align: center; color: var(--muted); padding: 26px 14px; border: 1px dashed var(--line); border-radius: 14px; }
+.alert { display: grid; grid-template-columns: 36px 1fr; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 11px 12px; margin-bottom: 8px; }
+.alert .ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 10px; font-weight: 800; }
+.ic.SELL { background: var(--sell-bg); color: var(--sell); } .ic.BUY { background: var(--buy-bg); color: var(--buy); } .ic.AVOID, .ic.WATCH { background: rgba(217,162,59,.15); color: var(--avoid); } .ic.INFO { background: var(--panel2); color: var(--muted); }
+.alert b { font-size: 14px; display: block; } .alert p { margin: 3px 0 0; font-size: 13px; color: var(--muted); } .alert time { font-size: 11.5px; color: var(--muted); }
+.alert.new { border-color: var(--accent); }
+.theme { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 13px; margin-bottom: 9px; }
+.theme h3 { margin: 0; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; }
+.theme h3 span { font-size: 12px; white-space: nowrap; }
+.ibar { height: 6px; background: var(--panel2); border-radius: 3px; position: relative; margin: 8px 0; }
+.ibar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.news { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 11px 13px; margin-bottom: 8px; display: block; color: var(--text); }
+.news .meta { font-size: 11.5px; color: var(--muted); }
+.news b { font-size: 14px; font-weight: 600; display: block; margin: 2px 0; }
+.ix { display: flex; gap: 14px; overflow-x: auto; font-size: 12px; padding: 0 0 10px; white-space: nowrap; scrollbar-width: none; }
+.ix b { color: var(--muted); font-weight: 600; margin-right: 4px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.panel h2 { font-size: 16px; margin: 0 0 6px; }
+.btn { display: block; width: 100%; text-align: center; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 12px; font: inherit; font-weight: 600; margin-top: 10px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.danger { color: var(--sell); }
+input { width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 11px; font: inherit; font-size: 13px; margin-top: 10px; }
+.welcome { text-align: center; padding: 30px 10px 10px; }
+.welcome img { width: 84px; height: 84px; border-radius: 20px; }
+.welcome h2 { font-size: 22px; margin: 14px 0 6px; }
+.steps { text-align: left; color: var(--muted); font-size: 14px; padding-left: 20px; }
+.steps li { margin: 6px 0; }
+.sheet { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 10; display: none; }
+.sheet.on { display: block; }
+.sheet .in { position: absolute; left: 0; right: 0; bottom: 0; max-height: 88vh; overflow-y: auto; background: var(--panel); border-radius: 18px 18px 0 0; padding: 16px 16px 30px; border-top: 1px solid var(--line); animation: up .2s ease; }
+@keyframes up { from { transform: translateY(40px); opacity: .5; } to { transform: none; opacity: 1; } }
+.grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 12px; }
+.verdict { margin: 10px 0; padding: 11px 12px; border-radius: 12px; background: var(--panel2); border-left: 4px solid var(--muted); font-size: 13.5px; }
+.verdict.SELL { border-color: var(--sell); background: var(--sell-bg); } .verdict.BUY { border-color: var(--buy); background: var(--buy-bg); }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 10px 0; }
+.stats div { background: var(--panel2); border-radius: 10px; padding: 8px 10px; }
+.stats span { display: block; font-size: 11px; color: var(--muted); }
+.stats b { font-family: var(--mono); }
+.sheet h4 { margin: 14px 0 6px; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.story { display: block; padding: 9px 11px; background: var(--panel2); border-radius: 10px; margin-bottom: 6px; color: var(--text); font-size: 13.5px; }
+.story small { display: block; color: var(--muted); font-size: 11.5px; }
+svg.spark { width: 100%; height: 90px; display: block; background: var(--panel2); border-radius: 12px; }
+.disc { font-size: 11px; color: var(--muted); margin-top: 18px; }
+.err { color: var(--sell); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1 id="title">Finad<small id="sub">Loading…</small></h1>
+  <button class="iconbtn" id="reload" aria-label="Check now">↻</button>
+</div>
+<main>
+  <section id="v-signals" class="view on"></section>
+  <section id="v-alerts" class="view"></section>
+  <section id="v-drivers" class="view"></section>
+  <section id="v-news" class="view"></section>
+  <section id="v-settings" class="view"></section>
+</main>
+<nav class="tabs" id="tabs">
+  <button data-v="signals" class="on"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Signals</button>
+  <button data-v="alerts"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>Alerts<span class="cnt" id="alertCnt"></span></button>
+  <button data-v="drivers"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>Drivers</button>
+  <button data-v="news"><svg viewBox="0 0 24 24"><path d="M4 5h13v14H6a2 2 0 01-2-2zM17 9h3v8a2 2 0 01-2 2M8 9h5M8 13h5"/></svg>News</button>
+  <button data-v="settings"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Link</button>
+</nav>
+<div class="sheet" id="sheet"><div class="in" id="sheetIn"></div></div>
+
+<script>
+// Outside the app (a browser, for testing) the page reads the feed itself: index.html#feed=<read-only id>.
+const App = window.FinadApp || (() => {
+  const id = (location.hash.match(/feed=([0-9A-Fa-f]{64})/) || [])[1] || localStorage.getItem('feed') || '';
+  let cache = '', at = 0;
+  const web = {
+    feed: () => cache, feedId: () => id, fetchedAt: () => at, version: () => 'web', markSeen() {}, unpair() { localStorage.removeItem('feed'); },
+    refresh() { fetch('https://textdb.dev/api/data/' + id).then(r => r.text()).then(t => { cache = t; at = Date.now(); onFeed(null); }).catch(e => onFeed(e.message)); },
+    scan() { alert('Scanning works in the Android app.'); }, pairCode(t) { const m = t.match(/[0-9A-Fa-f]{64}/); if (m) { localStorage.setItem('feed', m[0]); location.hash = 'feed=' + m[0]; location.reload(); } },
+    open(u) { window.open(u, '_blank'); }, checkUpdate() { alert('Updates work in the Android app.'); },
+  };
+  if (id) setTimeout(() => web.refresh(), 0);
+  return web;
+})();
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pct = (x, d = 1) => x == null || isNaN(x) ? '–' : (x >= 0 ? '+' : '') + (x * 100).toFixed(d) + '%';
+const num = (x, d = 2) => x == null || isNaN(x) ? '–' : (+x).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+const cls = x => x > 0 ? 'up' : x < 0 ? 'down' : '';
+const ago = ts => { const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; };
+const LBL = { SELL: 'SELL', BUY: 'BUY', AVOID: 'AVOID', HOLD: 'HOLD', WATCH: 'WATCH', NONE: '—', INFO: 'i' };
+let F = null, view = 'signals', sig = 'SELL', lastErr = null, seenBefore = +(localStorage.getItem('seenBefore') || 0);
+
+function load() {
+  const s = App.feed();
+  try { F = s ? JSON.parse(s) : null; } catch { F = null; }
+  render();
+}
+window.onFeed = (err) => { lastErr = err; load(); };
+window.finadPaired = () => { go('signals'); };
+window.finadOpen = (sym) => { if (sym) openStock(sym); else go('alerts'); };
+window.finadBack = () => { if ($('#sheet').classList.contains('on')) { closeSheet(); return true; } if (view !== 'signals') { go('signals'); return true; } return false; };
+
+function go(v) {
+  view = v;
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  if (v === 'alerts') { App.markSeen(); setTimeout(() => { localStorage.setItem('seenBefore', String(Date.now())); }, 4000); }
+  render(); scrollTo(0, 0);
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => go(b.dataset.v));
+$('#reload').onclick = () => { $('#sub').textContent = 'Checking…'; App.refresh(); };
+
+function render() {
+  const id = App.feedId();
+  $('#sub').textContent = !id ? 'Not linked yet' : F ? `Updated ${ago(F.updatedAt)}${lastErr ? ' · offline' : ''}` : lastErr ? 'Could not load: ' + lastErr : 'Loading…';
+  if (!id) { renderWelcome(); renderSettings(); return; }
+  if (!F) { $('#v-signals').innerHTML = `<div class="empty">${lastErr ? 'Could not reach the feed: ' + esc(lastErr) + '. Check the connection and tap ↻.' : 'Loading the feed…'}</div>`; renderSettings(); return; }
+  renderSignals(); renderAlerts(); renderDrivers(); renderNews(); renderSettings();
+}
+
+function renderWelcome() {
+  $('#v-signals').innerHTML = `<div class="welcome"><svg width="84" height="84" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#14243e"/><path d="M12 45 L24 32 L32 39 L50 18" fill="none" stroke="#2ec27e" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="18" r="4.5" fill="#2ec27e"/><path d="M12 21 L23 21 M12 29 L18 29" stroke="#f0645a" stroke-width="4.5" stroke-linecap="round"/></svg>
+    <h2>Welcome to Finad</h2><p class="muted">Sell and buy alerts from Finad on your computer, wherever you are.</p>
+    <ol class="steps"><li>On your computer, open Finad and go to <b>Phone</b>.</li><li>Click <b>Turn on the phone link</b>.</li><li>Tap the button below and scan the QR code.</li></ol>
+    <button class="btn primary" onclick="App.scan()">Scan QR code</button>
+    <input id="code" placeholder="…or paste the link or code"><button class="btn" onclick="App.pairCode(document.getElementById('code').value)">Link</button></div>`;
+}
+
+function rangeBar(r) { return r.pos52 == null ? '' : `<span class="mono">${num(r.lo52)}</span><div class="range"><i style="left:${(r.pos52 * 100).toFixed(1)}%"></i></div><span>${num(r.hi52)}</span>`; }
+function card(r) {
+  return `<div class="card ${r.action}" onclick="openStock('${esc(r.sym)}')">
+    <div class="r1"><span class="sym">${esc(r.sym)}</span><span class="badge ${r.action}">${LBL[r.action]}</span>${r.held ? '<span class="badge held">held</span>' : ''}<span class="name">${esc(r.name)}</span><span class="px">${num(r.price)}<small class="${cls(r.chg1d)}">${pct(r.chg1d)}</small></span></div>
+    <div class="why">${esc(r.rationale)}</div>
+    <div class="r3">${rangeBar(r)}</div>
+    <div class="r3"><span>News <b class="${cls(r.impact)}">${r.impact > 0 ? '+' : ''}${(+r.impact).toFixed(2)}</b></span><span>Conviction <b>${r.conviction}</b></span><span style="margin-left:auto">To 52w mid <b class="${cls(r.toMid)}">${pct(r.toMid)}</b></span></div>
+    ${r.drivers?.length ? `<div class="chips">${r.drivers.map(d => `<span class="chip ${r.impact > 0 ? 'pos' : 'neg'}">${esc(d)}</span>`).join('')}</div>` : ''}</div>`;
+}
+function renderSignals() {
+  const s = F.signals, c = F.counts || {};
+  const ix = (F.indices || []).map(i => `<span><b>${esc(i.label)}</b>${num(i.price, i.price > 1000 ? 0 : 2)} <span class="${cls(i.chg1d)}">${pct(i.chg1d, 2)}</span></span>`).join('');
+  const lists = { SELL: s.SELL, BUY: s.BUY, HELD: F.held || [], MORE: [...(s.AVOID || []), ...(s.HOLD || [])] };
+  const notes = { SELL: 'Near the 52-week high, and the news is turning against the stock.', BUY: 'Near the 52-week low, and the news is turning in its favour.', HELD: 'The stocks you hold, as Finad reads them now.', MORE: 'Avoid: near the low, and the news is still bad. Hold: near the high, and the news still supports it.' };
+  $('#v-signals').innerHTML = `<div class="ix">${ix}</div>
+    <div class="kpis"><div class="kpi"><span>Sell</span><b class="down">${c.SELL ?? 0}</b></div><div class="kpi"><span>Buy</span><b class="up">${c.BUY ?? 0}</b></div><div class="kpi"><span>You hold</span><b>${(F.held || []).length}</b></div></div>
+    <div class="seg">${[['SELL', 'Sell'], ['BUY', 'Buy'], ['HELD', 'Mine'], ['MORE', 'Avoid/Hold']].map(([k, l]) => `<button class="${sig === k ? 'on' : ''}" onclick="sig='${k}';renderSignals()">${l}</button>`).join('')}</div>
+    <p class="muted" style="font-size:12.5px;margin:0 0 10px">${notes[sig]}</p>
+    ${lists[sig].map(card).join('') || `<div class="empty">${sig === 'HELD' ? 'Add your holdings in Finad on the computer (Portfolio).' : 'Nothing here right now.'}</div>`}
+    <p class="disc">Automated signals from public news, not financial advice. Check the sources before you trade.</p>`;
+}
+function alertItem(a) {
+  return `<div class="alert ${a.at > seenBefore ? 'new' : ''}" ${a.sym && a.sym !== 'TEST' ? `onclick="openStock('${esc(a.sym)}')"` : ''}><div class="ic ${esc(a.action)}">${LBL[a.action] || ''}</div><div><b>${esc(a.title)}</b><p>${esc(a.body)}</p><time>${ago(a.at)}</time></div></div>`;
+}
+function renderAlerts() {
+  const list = F.alerts || [];
+  $('#alertCnt').textContent = list.filter(a => a.at > seenBefore).length || '';
+  $('#v-alerts').innerHTML = list.map(alertItem).join('') || '<div class="empty">No alerts yet. You get a notification whenever a stock newly turns SELL or BUY on your computer.</div>';
+}
+function renderDrivers() {
+  $('#v-drivers').innerHTML = '<p class="muted" style="font-size:13px;margin-top:0">World and market themes moving stocks now.</p>' + (F.themes || []).map(t => {
+    const w = Math.abs(t.intensity) * 50, col = t.intensity > 0 ? 'var(--buy)' : 'var(--sell)';
+    const dir = t.type === 'event' ? (t.intensity > 0 ? '↑ escalating' : '↓ easing') : (t.intensity > 0 ? '↑ rising' : '↓ falling');
+    return `<div class="theme"><h3>${esc(t.label)}<span class="${t.intensity > 0 ? 'up' : 'down'}">${dir}</span></h3>
+      <div class="ibar"><i style="left:${t.intensity >= 0 ? 50 : 50 - w}%;width:${w}%;background:${col}"></i></div>
+      ${t.winners?.length ? `<div class="chips">${t.winners.map(s => `<span class="chip pos" onclick="openStock('${esc(s)}')">${esc(s)} ▲</span>`).join('')}</div>` : ''}
+      ${t.losers?.length ? `<div class="chips">${t.losers.map(s => `<span class="chip neg" onclick="openStock('${esc(s)}')">${esc(s)} ▼</span>`).join('')}</div>` : ''}
+      ${(t.top || []).map(a => `<a class="story" href="#" data-link="${esc(a.link)}">${esc(a.title)}<small>${esc(a.publisher)}</small></a>`).join('')}</div>`;
+  }).join('');
+}
+function renderNews() {
+  $('#v-news').innerHTML = (F.news || []).map(n => `<a class="news" href="#" data-link="${esc(n.link)}"><div class="meta">${esc(n.publisher)} · ${ago(n.ts)}</div><b>${esc(n.title)}</b>
+    ${n.tickers?.length ? `<div class="chips">${n.tickers.map(([s, v]) => `<span class="chip ${v > 0.05 ? 'pos' : v < -0.05 ? 'neg' : ''}">${esc(s)} ${v > 0.05 ? '▲' : v < -0.05 ? '▼' : '•'}</span>`).join('')}</div>` : ''}</a>`).join('') || '<div class="empty">No news yet.</div>';
+}
+function renderSettings() {
+  const id = App.feedId();
+  $('#v-settings').innerHTML = `
+    <div class="panel"><h2>Computer link</h2>
+      ${id ? `<p class="muted" style="font-size:13px">Linked. Finad checks for new alerts about every 15 minutes, and whenever you open the app.</p>
+        <p style="font-size:12.5px">Feed last updated by the computer: <b>${F ? ago(F.updatedAt) : '–'}</b><br>Checked by this phone: <b>${App.fetchedAt() ? ago(App.fetchedAt()) : '–'}</b></p>
+        ${lastErr ? `<p class="err">Last check failed: ${esc(lastErr)}</p>` : ''}
+        <button class="btn" onclick="App.scan()">Scan a new QR code</button>
+        <button class="btn danger" onclick="if(confirm('Unlink this phone from Finad on your computer?')){App.unpair();location.reload()}">Unlink</button>`
+      : `<p class="muted">Not linked. On your computer, open Finad → Phone, turn on the phone link and scan its QR code.</p><button class="btn primary" onclick="App.scan()">Scan QR code</button>
+         <input id="code2" placeholder="…or paste the link or code"><button class="btn" onclick="App.pairCode(document.getElementById('code2').value)">Link</button>`}
+    </div>
+    <div class="panel"><h2>App</h2><p class="muted" style="font-size:13px">Finad for Android ${esc(App.version())}. It updates itself from the Finad website.</p>
+      <button class="btn" onclick="App.checkUpdate()">Check for updates</button>
+      <button class="btn" onclick="App.open('https://shamoug.github.io/finad/')">Finad website</button></div>
+    <div class="panel"><h2>Privacy</h2><p class="muted" style="font-size:13px">The phone reads a read-only copy of the signals that Finad on your computer publishes to textdb.dev, a free JSON store. Your share counts and costs are never sent, and this app keeps nothing but the link and the last copy of the feed.</p></div>
+    <p class="disc">Finad gives automated signals from public news. It is not a licensed financial adviser, and its signals are not personalised investment advice.</p>`;
+}
+
+function spark(r) {
+  const v = r.spark || []; if (v.length < 2) return '';
+  const W = 300, H = 90, lo = Math.min(r.lo52, ...v), hi = Math.max(r.hi52, ...v);
+  const x = i => i / (v.length - 1) * W, y = p => 6 + (1 - (p - lo) / (hi - lo || 1)) * (H - 12);
+  const col = r.action === 'SELL' ? '#f0645a' : r.action === 'BUY' ? '#2ec27e' : '#5b9cf0';
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="0" x2="${W}" y1="${y(hi)}" y2="${y(hi)}" stroke="#f0645a" stroke-dasharray="3 4" opacity=".6"/><line x1="0" x2="${W}" y1="${y(lo)}" y2="${y(lo)}" stroke="#2ec27e" stroke-dasharray="3 4" opacity=".6"/><path d="${v.map((p, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p).toFixed(1)).join('')}" fill="none" stroke="${col}" stroke-width="2"/></svg>`;
+}
+function find(sym) {
+  if (!F) return null;
+  for (const k of ['SELL', 'BUY', 'AVOID', 'HOLD']) { const r = (F.signals[k] || []).find(x => x.sym === sym); if (r) return r; }
+  return (F.held || []).find(x => x.sym === sym) || null;
+}
+function openStock(sym) {
+  const r = find(sym);
+  if (!r) { const a = (F?.alerts || []).find(x => x.sym === sym); $('#sheetIn').innerHTML = `<div class="grab"></div><h2>${esc(sym)}</h2><p class="muted">${a ? esc(a.body) : 'This stock has no signal right now. Open Finad on your computer for its full detail.'}</p>`; $('#sheet').classList.add('on'); return; }
+  $('#sheetIn').innerHTML = `<div class="grab"></div>
+    <div class="r1"><span class="sym" style="font-size:22px">${esc(r.sym)}</span><span class="badge ${r.action}">${LBL[r.action]}</span>${r.held ? '<span class="badge held">You hold</span>' : ''}<span class="px" style="margin-left:auto;font-size:18px">${num(r.price)}<small class="${cls(r.chg1d)}">${pct(r.chg1d)}</small></span></div>
+    <div class="muted" style="font-size:13px">${esc(r.name)} · ${esc(r.sector)}</div>
+    <div class="verdict ${r.action}"><b>${r.action === 'NONE' ? 'No signal.' : LBL[r.action] + ' · conviction ' + r.conviction + '/100.'}</b> ${esc(r.rationale)}</div>
+    ${spark(r)}
+    <div class="stats"><div><span>52-week high</span><b>${num(r.hi52)}</b></div><div><span>52-week low</span><b>${num(r.lo52)}</b></div>
+      <div><span>Position in range</span><b>${r.pos52 == null ? '–' : (r.pos52 * 100).toFixed(0) + '%'}</b></div><div><span>To 52w midpoint</span><b class="${cls(r.toMid)}">${pct(r.toMid)}</b></div>
+      <div><span>News impact</span><b class="${cls(r.impact)}">${(+r.impact).toFixed(2)}</b></div><div><span>Conviction</span><b>${r.conviction}/100</b></div></div>
+    ${r.drivers?.length ? `<h4>World drivers</h4><div class="chips">${r.drivers.map(d => `<span class="chip ${r.impact > 0 ? 'pos' : 'neg'}">${esc(d)}</span>`).join('')}</div>` : ''}
+    ${r.stories?.length ? `<h4>Company news</h4>${r.stories.map(s => `<a class="story" href="#" data-link="${esc(s.link)}">${esc(s.title)}<small>${esc(s.publisher)} · <span class="${cls(s.c)}">${s.c > 0 ? 'positive' : 'negative'}</span></small></a>`).join('')}` : ''}
+    <p class="disc">Automated signal, not financial advice.</p>`;
+  $('#sheet').classList.add('on');
+}
+function closeSheet() { $('#sheet').classList.remove('on'); }
+document.addEventListener('click', e => { const a = e.target.closest('[data-link]'); if (a) { e.preventDefault(); e.stopPropagation(); App.open(a.dataset.link); } }, true);
+$('#sheet').onclick = e => { if (e.target.id === 'sheet') closeSheet(); };
+
+load();
+if (App.feedId()) App.refresh();
+</script>
+</body>
+</html>
