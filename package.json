@@ -1,7 +1,7 @@
 {
   "name": "finad",
   "productName": "Finad",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Finad - reads market and world news, maps it to stocks, and flags sells near 52-week highs and buys near 52-week lows.",
   "main": "desktop/main.js",
   "type": "commonjs",
