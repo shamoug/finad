@@ -14,6 +14,7 @@ import android.os.Build;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -60,12 +61,24 @@ final class Feed {
     static synchronized String fetch(Context c, boolean notify) throws Exception {
         String id = id(c);
         if (id == null) return null;
-        String body = get(STORE + id);
+        String body = unwrap(get(STORE + id));
         JSONObject feed = new JSONObject(body);   // throws on anything that isn't JSON
         try (FileOutputStream out = new FileOutputStream(cacheFile(c))) { out.write(body.getBytes(StandardCharsets.UTF_8)); }
         prefs(c).edit().putLong("fetchedAt", System.currentTimeMillis()).apply();
         if (notify) notifyNew(c, feed);
         return body;
+    }
+
+    /** The store may hand the feed back as a JSON string holding the JSON (and with a BOM): peel that down to the object. */
+    static String unwrap(String s) throws Exception {
+        for (int i = 0; s != null && i < 3; i++) {
+            s = s.replace("﻿", "").trim();
+            if (!s.startsWith("\"")) break;
+            Object v = new JSONTokener(s).nextValue();
+            if (!(v instanceof String)) break;
+            s = (String) v;
+        }
+        return s;
     }
 
     /** The alerts the app has shown on screen count as seen: no notification for them later. */

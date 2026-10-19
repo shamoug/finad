@@ -141,7 +141,8 @@ let F = null, view = 'signals', sig = 'SELL', lastErr = null, seenBefore = +(loc
 
 function load() {
   const s = App.feed();
-  try { F = s ? JSON.parse(s) : null; } catch { F = null; }
+  try { F = s ? JSON.parse(s.replace(/^﻿/, '')) : null; while (typeof F === 'string') F = JSON.parse(F); } catch { F = null; }
+  if (F && typeof F !== 'object') F = null;
   render();
 }
 window.onFeed = (err) => { lastErr = err; load(); };
