@@ -253,7 +253,7 @@ function find(sym) {
 }
 function openStock(sym) {
   const r = find(sym);
-  if (!r) { const a = (F?.alerts || []).find(x => x.sym === sym); $('#sheetIn').innerHTML = `<div class="grab"></div><h2>${esc(sym)}</h2><p class="muted">${a ? esc(a.body) : 'This stock has no signal right now. Open Finad on your computer for its full detail.'}</p>`; $('#sheet').classList.add('on'); return; }
+  if (!r) { const a = (F?.alerts || []).find(x => x.sym === sym); $('#sheetIn').innerHTML = `<div class="grab"></div><h2>${esc(sym)}</h2><p class="muted">${a ? esc(a.body) : 'This stock has no signal right now. Open Finad on your computer for its full detail.'}</p>`; $('#sheet').classList.add('on'); App.sheet?.(true); return; }
   $('#sheetIn').innerHTML = `<div class="grab"></div>
     <div class="r1"><span class="sym" style="font-size:22px">${esc(r.sym)}</span><span class="badge ${r.action}">${LBL[r.action]}</span>${r.held ? '<span class="badge held">You hold</span>' : ''}<span class="px" style="margin-left:auto;font-size:18px">${num(r.price)}<small class="${cls(r.chg1d)}">${pct(r.chg1d)}</small></span></div>
     <div class="muted" style="font-size:13px">${esc(r.name)} · ${esc(r.sector)}</div>
@@ -265,9 +265,9 @@ function openStock(sym) {
     ${r.drivers?.length ? `<h4>World drivers</h4><div class="chips">${r.drivers.map(d => `<span class="chip ${r.impact > 0 ? 'pos' : 'neg'}">${esc(d)}</span>`).join('')}</div>` : ''}
     ${r.stories?.length ? `<h4>Company news</h4>${r.stories.map(s => `<a class="story" href="#" data-link="${esc(s.link)}">${esc(s.title)}<small>${esc(s.publisher)} · <span class="${cls(s.c)}">${s.c > 0 ? 'positive' : 'negative'}</span></small></a>`).join('')}` : ''}
     <p class="disc">Automated signal, not financial advice.</p>`;
-  $('#sheet').classList.add('on');
+  $('#sheet').classList.add('on'); App.sheet?.(true);
 }
-function closeSheet() { $('#sheet').classList.remove('on'); }
+function closeSheet() { $('#sheet').classList.remove('on'); App.sheet?.(false); }
 document.addEventListener('click', e => { const a = e.target.closest('[data-link]'); if (a) { e.preventDefault(); e.stopPropagation(); App.open(a.dataset.link); } }, true);
 $('#sheet').onclick = e => { if (e.target.id === 'sheet') closeSheet(); };
 

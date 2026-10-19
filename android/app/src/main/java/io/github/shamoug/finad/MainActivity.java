@@ -21,6 +21,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
@@ -30,6 +32,8 @@ import org.json.JSONObject;
 public class MainActivity extends Activity {
     private static final String PAGE = "file:///android_asset/index.html";
     private WebView web;
+    private SwipeRefreshLayout pull;
+    private volatile boolean sheetOpen;
     private boolean loaded;
     private String pendingSym;
 
@@ -38,7 +42,14 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         web = new WebView(this);
         web.setBackgroundColor(Color.parseColor("#0A101D"));
-        setContentView(web);
+        // Pulling down at the top of the page refreshes everything: the feed and the app version.
+        pull = new SwipeRefreshLayout(this);
+        pull.addView(web);
+        pull.setColorSchemeColors(0xFF2EC27E);
+        pull.setProgressBackgroundColorSchemeColor(0xFF1A2333);
+        pull.setOnChildScrollUpCallback((parent, child) -> sheetOpen || web.canScrollVertically(-1));
+        pull.setOnRefreshListener(this::refreshAll);
+        setContentView(pull);
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -59,6 +70,7 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 loaded = true;
+                if (Feed.id(MainActivity.this) == null) pull.setRefreshing(false);   // linked: the page's own refresh stops it
                 if (pendingSym != null) { js("window.finadOpen && finadOpen(" + JSONObject.quote(pendingSym) + ")"); pendingSym = null; }
             }
         });
@@ -101,12 +113,24 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    /** Like Ctrl+F5: empties the page's cache and reloads it, fetches the feed afresh (the reloaded page asks for it) and
+     *  looks for a new version of the app. */
+    private void refreshAll() {
+        new Thread(() -> { try { Updater.check(getApplicationContext(), true); } catch (Exception e) { /* next time */ } }).start();
+        sheetOpen = false;
+        loaded = false;
+        web.clearCache(true);
+        web.loadUrl(PAGE);
+    }
+
     private void refreshThen(String script) {
         new Thread(() -> {
             String err = null;
             try { Feed.fetch(getApplicationContext(), false); } catch (Exception e) { err = e.getMessage(); }
             String e2 = err;
             runOnUiThread(() -> {
+                if (pull != null) pull.setRefreshing(false);
+                if (e2 != null) toast("Could not refresh: " + e2);
                 js("window.onFeed && onFeed(" + (e2 == null ? "null" : JSONObject.quote(e2)) + ")");
                 if (script != null) js(script);
             });
@@ -124,6 +148,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public long fetchedAt() { return Feed.prefs(getApplicationContext()).getLong("fetchedAt", 0); }
         @JavascriptInterface public String version() { return BuildConfig.VERSION_NAME; }
         @JavascriptInterface public void refresh() { runOnUiThread(() -> refreshThen(null)); }
+        @JavascriptInterface public void sheet(boolean open) { sheetOpen = open; }
         @JavascriptInterface public void markSeen() { Feed.markSeen(getApplicationContext()); }
         @JavascriptInterface public void scan() { runOnUiThread(MainActivity.this::scan); }
         @JavascriptInterface public void pairCode(String text) { runOnUiThread(() -> { if (!pair(Uri.parse(text.trim()))) { if (Feed.validId(text.trim())) pair(Uri.parse("finad://pair?feed=" + text.trim())); else toast("That is not a Finad link or code."); } }); }

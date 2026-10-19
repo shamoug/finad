@@ -163,6 +163,7 @@ final class Feed {
         HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
         h.setConnectTimeout(10000); h.setReadTimeout(20000);
         h.setRequestProperty("Accept", "application/json");
+        h.setUseCaches(false); h.setRequestProperty("Cache-Control", "no-cache");
         h.setRequestProperty("User-Agent", "FinadAndroid/" + BuildConfig.VERSION_NAME);
         try {
             if (h.getResponseCode() != 200) throw new Exception("HTTP " + h.getResponseCode());
