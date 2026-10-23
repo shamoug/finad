@@ -62,7 +62,7 @@ function New-Shortcut([string]$Path, [string]$Target, [string]$Icon) {
 
 # Copies the app's files, leaving out what only the project needs (Android source, website, git).
 function Copy-AppFiles([string]$From, [string]$To) {
-  $skip = @('.git', '.github', 'android', 'docs', 'dist', 'node_modules', '.claude')
+  $skip = @('.git', '.github', 'android', 'docs', 'dist', 'node_modules')
   New-Item -ItemType Directory -Force $To | Out-Null
   Get-ChildItem -Force $From | Where-Object { $skip -notcontains $_.Name -and $_.Name -notmatch '\.(bat|sh|md)$' } | ForEach-Object {
     Copy-Item -Recurse -Force $_.FullName (Join-Path $To $_.Name)
